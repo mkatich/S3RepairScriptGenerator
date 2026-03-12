@@ -31,6 +31,8 @@ public class S3RepairScriptGenerator {
     
     static String s3EndpointUrl = null;//"https://s3.us-central-1.wasabisys.com"
     
+    static String contentDisposition = null;//will allow a content-disposition param (such as "attachment") for the upload commands
+    
     //Path to the parent directory of all the good backup files we'll use for uploading (if chosen)
     static String goodBackupFilesPath = null;
     
@@ -65,11 +67,14 @@ public class S3RepairScriptGenerator {
         System.out.println("      --bucket <s3-bucket-name> \\");
         System.out.println("      --endpoint <s3-endpoint-url> \\");
         System.out.println("      [--backup <path-to-good-backups>] \\");
+        System.out.println("      [--content-disposition <value>] \\");
         System.out.println("      [--test-mode]");
         System.out.println("      --outdir <output-directory> \\");
         System.out.println();
         System.out.println("Notes:");
         System.out.println("    --backup is REQUIRED when --script is 'upload' or 'both'.");
+        System.out.println("    --content-disposition attachment => will cause web browser to download rather than attempt to open/play.");
+        System.out.println("    --test-mode => the only thing this does is add _TEST to the script file names.");
         System.out.println();
     }
     
@@ -78,13 +83,14 @@ public class S3RepairScriptGenerator {
     //Example usage below
     //(Either put these commands all on one line, or use ^ for Windows CMD or \ for Bash)
     
-    //Build both delete and upload scripts:
+    //Build both delete and upload scripts, with a content-disposition value:
     java -jar generator.jar 
         --affected "D:/fix_files/AffectedFilesList.txt" 
         --script both 
         --bucket mybucketname 
         --endpoint https://s3.us-central-1.storageprovider.com 
         --backup "Z:/" 
+        --content-disposition attachment
         --outdir "D:/fix_files/"
     
     //Build only the delete script:
@@ -116,6 +122,7 @@ public class S3RepairScriptGenerator {
         boolean argTestMode = hasFlag(args, "--test-mode");//optional flag
         String argBucket = getArg(args, "--bucket");//REQUIRED
         String argEndpoint = getArg(args, "--endpoint");//REQUIRED
+        String argContentDisp = getArg(args, "--content-disposition");
         
         //Set parameter values, if value was provided
         if (argScript != null) 
@@ -132,6 +139,8 @@ public class S3RepairScriptGenerator {
             s3BucketPath = argBucket;
         if (argEndpoint != null) 
             s3EndpointUrl = argEndpoint;
+        if (argContentDisp != null) 
+            contentDisposition = argContentDisp;
         
         //Validate scriptToBuild parameter first
         if (scriptToBuild == null 
@@ -174,6 +183,9 @@ public class S3RepairScriptGenerator {
             printUsage();
             return;
         }
+        if (scriptToBuild.contains("upload") && contentDisposition != null) {
+            System.out.println("WARNING: --content-disposition was provided but will be ignored because no upload script is being generated.");
+        }
         
         //Print parameters summary for user 
         System.out.println("");
@@ -187,6 +199,9 @@ public class S3RepairScriptGenerator {
         System.out.println("Scripts to build: " + scriptToBuild);
         System.out.println("S3 bucket: " + s3BucketPath);
         System.out.println("S3 endpoint: " + s3EndpointUrl);
+        if (contentDisposition != null) {
+            System.out.println("Content disposition header for uploads: " + contentDisposition);
+        }
         System.out.println("Backup files dir: " + goodBackupFilesPath);
         if (testMode) {
             System.out.println("Test mode: " + testMode);
@@ -354,6 +369,11 @@ public class S3RepairScriptGenerator {
                     currLineIsolatedFileName = currLine.substring(indexStartFileName, currLine.length());
                     currLineIsolatedPath = currLine.substring(0, indexStartFileName);
                     
+                    //Prep content-disposition parameter if user included it
+                    String contentDispPart = "";
+                    if (contentDisposition != null) {
+                        contentDispPart = "--content-disposition "+contentDisposition+" ";
+                    }
                     
                     
                     //Add line for output to let user know what we're working on
@@ -371,7 +391,7 @@ public class S3RepairScriptGenerator {
                             + "--exclude '*' "
                             + "--include `\""+currLineIsolatedFileName+"`\" "
                             + "--metadata-directive REPLACE "
-                            + "--content-disposition attachment "
+                            + contentDispPart
                             + "--endpoint-url="+s3EndpointUrl+" "
                             + "--checksum-algorithm=CRC32 "
                             + "\"";
@@ -407,7 +427,7 @@ public class S3RepairScriptGenerator {
                             + "--exclude '*' "
                             + "--include \\\""+currLineIsolatedFileName+"\\\" "
                             + "--metadata-directive REPLACE "
-                            + "--content-disposition attachment "
+                            + contentDispPart
                             + "--endpoint-url="+s3EndpointUrl+" "
                             + "--checksum-algorithm=CRC32\"";
                     
