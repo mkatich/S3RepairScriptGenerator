@@ -28,7 +28,7 @@ Generates PowerShell and Bash scripts that remove corrupted objects:
 
 - Uses your specified bucket  
 - Uses your specified S3 endpoint  
-- Deletes each object  
+- Deletes each affected object, as specified in the list  
 
 ### **2. Upload Scripts**
 Generates PowerShell and Bash scripts that re‑upload clean backup files:
