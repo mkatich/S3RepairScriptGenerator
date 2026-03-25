@@ -240,7 +240,8 @@ public class TextFileIO {
         if (this.isOpenForWriting){
             try {
                 bw.write(newLogLine);
-                bw.newLine();
+                //bw.newLine();//newline - This writes OS specific newline, which on Windows is \r\n, and that's bad for Mac
+                bw.write("\n");//newline, works on both Windows and Mac
                 bw.flush();//flush to force write so progress is viewable on the fly or if the process ends unnaturally
                 writeSuccess = true;
                 numLinesWritten++;
@@ -269,7 +270,8 @@ public class TextFileIO {
                         bw.write(this.cellDelimiter);
                     bw.write(newLogLine[i]);
                 }
-                bw.newLine();
+                //bw.newLine();//newline - This writes OS specific newline, which on Windows is \r\n, and that's bad for Mac
+                bw.write("\n");//newline, works on both Windows and Mac
                 bw.flush();//flush to force write so progress is viewable on the fly or if the process ends unnaturally
                 writeSuccess = true;
                 numLinesWritten++;
@@ -301,7 +303,8 @@ public class TextFileIO {
         if (this.isOpenForWriting){
             try {
                 //write newline and close
-                bw.newLine();
+                //bw.newLine();//newline - This writes OS specific newline, which on Windows is \r\n, and that's bad for Mac
+                bw.write("\n");//newline, works on both Windows and Mac
                 bw.flush();//force it to write so we can be sure it's viewable on the fly or if the process ends unnaturally
                 writeSuccess = true;
             }
