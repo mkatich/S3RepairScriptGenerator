@@ -10,7 +10,6 @@
         <maven.compiler.source>21</maven.compiler.source>
         <maven.compiler.target>21</maven.compiler.target>
         <exec.mainClass>com.mycompany.s3repairscriptgenerator.S3RepairScriptGenerator</exec.mainClass>
-        <!--<exec.mainClass>BennyHinnReplaceCorruptFiles</exec.mainClass>-->
     </properties>
     
     <build>

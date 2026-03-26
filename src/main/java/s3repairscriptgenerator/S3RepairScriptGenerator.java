@@ -19,7 +19,7 @@ public class S3RepairScriptGenerator {
     // * Test mode (hidden option)
     // * Path of directory where to write script files
     
-    static final String APPNAME = "BennyHinnReplaceCorruptFiles";
+    static final String APPNAME = "S3RepairScriptGenerator";
     
     //Path to the file that contains the list of affected/bad objects
     static String affectedFilesListPath = null;
